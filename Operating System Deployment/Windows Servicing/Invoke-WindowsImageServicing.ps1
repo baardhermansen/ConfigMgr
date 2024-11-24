@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 2.2.0
+.VERSION 2.2.1
 .GUID bae8c5cd-d70a-4cab-89dd-5068cc08a15d
 .AUTHOR NickolajA
 .DESCRIPTION Service an offline Windows image based of the ISO media source files, with the latest Cumulative Update, Service Stack Update, .NET Framework and optionally Dynamic Updates.
@@ -40,7 +40,7 @@
     - Local paths usage only, UNC paths are not supported
     - Folder containing the Windows source files extracted from an ISO media
     - Supported operating system editions for servicing: Enterprise, Education, Pro
-    - Synchronized WSUS products: Windows 10, Windows 10 version 1903 and later, Windows 10 Dynamic Updates
+    - Synchronized WSUS products: Windows 11, Windows 11 Dynamic Updates, Windows 10, Windows 10 version 1903 and later, Windows 10 Dynamic Updates
     - Windows Management Framework 5.x is required when used on Windows Server 2012 R2
 
     Required folder structure should exist beneath the location specified for the OSMediaFilesRoot parameter:
@@ -73,7 +73,10 @@
     Site server where the SMS Provider is installed.
 
 .PARAMETER OSMediaFilesRoot
-    Specify the full path for the root location containing a folder named Source with the Windows 10 installation media files.
+    Specify the full path for the root location containing a folder named Source with the Windows 10 or later installation media files.
+
+.PARAMETER OSName
+    Specify the operating system name, e.g. Windows 10 of the image being serviced.
 
 .PARAMETER OSEdition
     Specify the image edition property to be extracted from the OS image.
@@ -100,7 +103,7 @@
     Specify to include Local Experience Packs (.appx packages) in addition or in case of non-existing base Language Packs (LP.cab packages).
 
 .PARAMETER IncludeLanguageFeatures
-    Specify to include Language Features from the Windows 10 Features on Demand ISO media.
+    Specify to include Language Features from the Windows 10 or later Features on Demand ISO media.
 
 .PARAMETER LanguageFeaturesMediaFile
     Specify the full path to the Feature on Demand ISO media file, which inclues the required language feature cabinet files.
@@ -128,30 +131,30 @@
 
 .EXAMPLE
     # Service a Windows Enterprise image from source files location with latest Cumulative Update, Service Stack Update and e.g. .NET Framework:
-    .\Invoke-WindowsImageServicing.ps1 -SiteServer CM01 -OSMediaFilesRoot "C:\CMSource\OSD\W10E1903X64" -OSVersion 1903 -OSArchitecture x64
+    .\Invoke-WindowsImageServicing.ps1 -SiteServer CM01 -OSMediaFilesRoot "C:\CMSource\OSD\W10E1903X64" -OSName "Windows 10" -OSVersion 1903 -OSArchitecture x64
 
     # Service a Windows Education image from source files location with latest Cumulative Update, Service Stack Update and e.g. .NET Framework:
-    .\Invoke-WindowsImageServicing.ps1 -SiteServer CM01 -OSMediaFilesRoot "C:\CMSource\OSD\W10E1903X64" -OSVersion 1903 -OSArchitecture x64 -OSEdition "Education"
+    .\Invoke-WindowsImageServicing.ps1 -SiteServer CM01 -OSMediaFilesRoot "C:\CMSource\OSD\W10E1903X64" -OSName "Windows 10" -OSVersion 1903 -OSArchitecture x64 -OSEdition "Education"
 
     # Service a Windows Enterprise image from source files location with latest Cumulative Update, Service Stack Update, .NET Framework and include .NET Framework 3.5.1:
-    .\Invoke-WindowsImageServicing.ps1 -SiteServer CM01 -OSMediaFilesRoot "C:\CMSource\OSD\W10E1903X64" -OSVersion 1903 -OSArchitecture x64 -IncludeNetFramework
+    .\Invoke-WindowsImageServicing.ps1 -SiteServer CM01 -OSMediaFilesRoot "C:\CMSource\OSD\W10E1903X64" -OSName "Windows 10" -OSVersion 1903 -OSArchitecture x64 -IncludeNetFramework
 
     # Service a Windows Enterprise image from source files location with latest Cumulative Update, Service Stack Update, .NET Framework and include .NET Framework 3.5.1 and remove provisioned Appx packages:
-    .\Invoke-WindowsImageServicing.ps1 -SiteServer CM01 -OSMediaFilesRoot "C:\CMSource\OSD\W10E1903X64" -OSVersion 1903 -OSArchitecture x64 -IncludeNetFramework -RemoveAppxPackages
+    .\Invoke-WindowsImageServicing.ps1 -SiteServer CM01 -OSMediaFilesRoot "C:\CMSource\OSD\W10E1903X64" -OSName "Windows 10" -OSVersion 1903 -OSArchitecture x64 -IncludeNetFramework -RemoveAppxPackages
 
     # Service a Windows Enterprise image from source files location with latest Cumulative Update, Service Stack Update, .NET Framework and Dynamic Updates:
-    .\Invoke-WindowsImageServicing.ps1 -SiteServer CM01 -OSMediaFilesRoot "C:\CMSource\OSD\W10E1903X64" -OSVersion 1903 -OSArchitecture x64 -IncludeDynamicUpdates
+    .\Invoke-WindowsImageServicing.ps1 -SiteServer CM01 -OSMediaFilesRoot "C:\CMSource\OSD\W10E1903X64" -OSName "Windows 10" -OSVersion 1903 -OSArchitecture x64 -IncludeDynamicUpdates
 
     # Service a Windows Enterprise image from source files location with latest Cumulative Update, Service Stack Update, .NET Framework, Dynamic Updates and include en-GB and sv-SE language packs:
     # NOTE: LXPMediaFile ISO file name looks similar to the following: mu_windows_10_version_1903_local_experience_packs_lxps_for_lip_languages_released_oct_2019_x86_arm64_x64_dvd_2f05e51a.iso
-    .\Invoke-WindowsImageServicing.ps1 -SiteServer CM01 -OSMediaFilesRoot "C:\CMSource\OSD\W10E1903X64" -OSVersion 1903 -OSArchitecture x64 -IncludeDynamicUpdates -IncludeLanguagePack -LPMediaFile "C:\CMSource\OSD\W10E1903X64\LP.iso" -LPRegionTag "en-GB", "sv-SE"
+    .\Invoke-WindowsImageServicing.ps1 -SiteServer CM01 -OSMediaFilesRoot "C:\CMSource\OSD\W10E1903X64" -OSName "Windows 10" -OSVersion 1903 -OSArchitecture x64 -IncludeDynamicUpdates -IncludeLanguagePack -LPMediaFile "C:\CMSource\OSD\W10E1903X64\LP.iso" -LPRegionTag "en-GB", "sv-SE"
 
 .NOTES
     FileName:    Invoke-WindowsImageServicing.ps1
     Author:      Nickolaj Andersen
     Contact:     @NickolajA
     Created:     2018-09-12
-    Updated:     2022-04-05
+    Updated:     2023-02-17
     
     Version history:
     1.0.0 - (2018-09-12) Script created
@@ -182,6 +185,8 @@
     2.1.1 - (2020-11-17) Added support for new Windows 10 versioning changes with 2XH1/2XH2.
     2.1.2 - (2022-04-01) No, it's not a joke - added extended dism.exe logging for each /Add-Package operation for further troubleshooting if something goes wrong
     2.2.0 - (2022-04-05) Added support to handle LCU+SSU combined in the same cabinet file. Removed Adobe Flash Player update file support.
+    2.2.1 - (2022-02-17) Added OSName parameter for support of Windows 11 and new releases. .NET Framework update item download process has been improved to only download what's natively
+                         pre-installed on Windows.
 #>
 [CmdletBinding(SupportsShouldProcess=$true)]
 param(
@@ -192,7 +197,7 @@ param(
     [ValidateScript({Test-Connection -ComputerName $_ -Count 1 -Quiet})]
     [string]$SiteServer,
 
-    [parameter(Mandatory=$true, ParameterSetName="ImageServicing", HelpMessage="Specify the full path for the root location containing a folder named Source with the Windows 10 installation media files.")]
+    [parameter(Mandatory=$true, ParameterSetName="ImageServicing", HelpMessage="Specify the full path for the root location containing a folder named Source with the Windows 10 or later installation media files.")]
     [parameter(Mandatory=$true, ParameterSetName="LanguagePack")]
     [parameter(Mandatory=$true, ParameterSetName="LanguageFeatures")]
     [ValidatePattern("^[A-Za-z]{1}:\\\w+")]
@@ -217,6 +222,13 @@ param(
     })]
     [string]$OSMediaFilesRoot,
 
+    [parameter(Mandatory=$true, ParameterSetName="ImageServicing", HelpMessage="Specify the operating system name, e.g. Windows 10 of the image being serviced.")]
+    [parameter(Mandatory=$true, ParameterSetName="LanguagePack")]
+    [parameter(Mandatory=$true, ParameterSetName="LanguageFeatures")]
+    [ValidateNotNullOrEmpty()]
+    [ValidateSet("Windows 10", "Windows 11")]
+    [string]$OSName,
+
     [parameter(Mandatory=$false, ParameterSetName="ImageServicing", HelpMessage="Specify the image edition property to be extracted from the OS image.")]
     [parameter(Mandatory=$false, ParameterSetName="LanguagePack")]
     [parameter(Mandatory=$false, ParameterSetName="LanguageFeatures")]
@@ -228,7 +240,7 @@ param(
     [parameter(Mandatory=$true, ParameterSetName="LanguagePack")]
     [parameter(Mandatory=$true, ParameterSetName="LanguageFeatures")]
     [ValidateNotNullOrEmpty()]
-    [ValidateSet("1703", "1709", "1803", "1809", "1903", "1909", "2004", "20H2", "21H1", "21H2", "22H1", "22H2", "23H1", "23H2", "24H1", "24H2")]
+    [ValidateSet("1703", "1709", "1803", "1809", "1903", "1909", "2004", "20H2", "21H1", "21H2", "22H1", "22H2", "23H2", "24H2", "25H2")]
     [string]$OSVersion,
 
     [parameter(Mandatory=$true, ParameterSetName="ImageServicing", HelpMessage="Specify the operating system architecture being serviced.")]
@@ -277,7 +289,7 @@ param(
     [parameter(Mandatory=$false, ParameterSetName="LanguageFeatures")]
     [switch]$IncludeLocalExperiencePack,
 
-    [parameter(Mandatory=$true, ParameterSetName="LanguageFeatures", HelpMessage="Specify to include Language Features from the Windows 10 Features on Demand ISO media.")]
+    [parameter(Mandatory=$true, ParameterSetName="LanguageFeatures", HelpMessage="Specify to include Language Features from the Windows 10 or later Features on Demand ISO media.")]
     [switch]$IncludeLanguageFeatures,
 
     [parameter(Mandatory=$true, ParameterSetName="LanguageFeatures", HelpMessage="Specify the full path to the Feature on Demand ISO media file, which inclues the required language feature cabinet files.")]
@@ -551,21 +563,52 @@ Process {
             [string]$UpdateType
         )
 
-        # Determine correct WMI filtering for version greater than 1903, since it requires a new product type
-        if (($OSVersion -ge 1903) -or ([string]$OSVersion -match "H1|H2")) {
-            $WMIQueryFilter = "LocalizedCategoryInstanceNames = 'Windows 10, version 1903 and later'"
-        }
-        else {
-            $WMIQueryFilter = "LocalizedCategoryInstanceNames = 'Windows 10'"
+        # Apply logic to construct WMI query filter and localized display name filter dynamically depending on selected operating system name and version
+        switch ($OSName) {
+            "Windows 10" {
+                $LocalizedDisplayNameFilter = "*$($UpdateType)*$($OSVersion)*$($OSArchitecture)*"
+
+                # Determine correct WMI filtering for version greater than 1903, since it requires a new product type
+                if (($OSVersion -ge 1903) -or ([string]$OSVersion -match "H1|H2")) {
+                    $WMIQueryFilter = "LocalizedCategoryInstanceNames = 'Windows 10, version 1903 and later'"
+                }
+                else {
+                    $WMIQueryFilter = "LocalizedCategoryInstanceNames = 'Windows 10'"
+                }
+            }
+            "Windows 11" {
+                $WMIQueryFilter = "LocalizedCategoryInstanceNames = 'Windows 11'"
+
+                # Windows 11 21H2 doesn't contain it's version number in the localized display name property, cater for that
+                if ($OSVersion -like "21H2") {
+                    $LocalizedDisplayNameFilter = "*$($UpdateType)*$($OSArchitecture)*"
+                }
+                else {
+                    $LocalizedDisplayNameFilter = "*$($UpdateType)*$($OSVersion)*$($OSArchitecture)*"
+                }
+            }
         }
 
         # Determine the correct display name filtering options based upon update type
         switch ($UpdateType) {
             "Cumulative Update" {
-                $UpdateItem = Get-WmiObject -Namespace "root\SMS\Site_$($SiteCode)" -Class SMS_SoftwareUpdate -ComputerName $SiteServer -Filter $WMIQueryFilter -ErrorAction Stop | Where-Object { ($_.LocalizedDisplayName -like "*$($UpdateType)*$($OSVersion)*$($OSArchitecture)*") -and ($_.LocalizedDisplayName -notlike "*.NET Framework*") -and ($_.IsSuperseded -eq $false) -and ($_.IsLatest -eq $true)  } | Sort-Object -Property DatePosted -Descending | Select-Object -First 1
+                $UpdateItem = Get-WmiObject -Namespace "root\SMS\Site_$($SiteCode)" -Class "SMS_SoftwareUpdate" -ComputerName $SiteServer -Filter $WMIQueryFilter -ErrorAction Stop | Where-Object { ($_.LocalizedDisplayName -like $LocalizedDisplayNameFilter) -and ($_.LocalizedDisplayName -notlike "*.NET Framework*") -and ($_.IsSuperseded -eq $false) -and ($_.IsLatest -eq $true)  } | Sort-Object -Property DatePosted -Descending | Select-Object -First 1
+            }
+            ".NET Framework" {
+                # Preinstalled .NET Framework version data from: https://learn.microsoft.com/en-us/dotnet/framework/get-started/system-requirements#supported-client-operating-systems
+                $NETFrameworkOSNativeTable = @{
+                    "Windows102004" = "NDP48"
+                    "Windows1020H2" = "NDP48"
+                    "Windows1021H1" = "NDP48"
+                    "Windows1021H2" = "NDP48"
+                    "Windows1121H2" = "NDP481"
+                    "Windows1022H2" = "NDP48"
+                    "Windows1122H2" = "NDP481"
+                }
+                $UpdateItem = Get-WmiObject -Namespace "root\SMS\Site_$($SiteCode)" -Class "SMS_SoftwareUpdate" -ComputerName $SiteServer -Filter $WMIQueryFilter -ErrorAction Stop | Where-Object { ($_.LocalizedDisplayName -like $LocalizedDisplayNameFilter) -and ($_.IsSuperseded -eq $false) -and ($_.IsLatest -eq $true)  } | Sort-Object -Property DatePosted -Descending | Select-Object -First 1
             }
             default {
-                $UpdateItem = Get-WmiObject -Namespace "root\SMS\Site_$($SiteCode)" -Class SMS_SoftwareUpdate -ComputerName $SiteServer -Filter $WMIQueryFilter -ErrorAction Stop | Where-Object { ($_.LocalizedDisplayName -like "*$($UpdateType)*$($OSVersion)*$($OSArchitecture)*") -and ($_.IsSuperseded -eq $false) -and ($_.IsLatest -eq $true)  } | Sort-Object -Property DatePosted -Descending | Select-Object -First 1
+                $UpdateItem = Get-WmiObject -Namespace "root\SMS\Site_$($SiteCode)" -Class "SMS_SoftwareUpdate" -ComputerName $SiteServer -Filter $WMIQueryFilter -ErrorAction Stop | Where-Object { ($_.LocalizedDisplayName -like $LocalizedDisplayNameFilter) -and ($_.IsSuperseded -eq $false) -and ($_.IsLatest -eq $true)  } | Sort-Object -Property DatePosted -Descending | Select-Object -First 1
             }
         }
     
@@ -578,25 +621,43 @@ Process {
                     # Get the content files associated with current Content ID
                     $UpdateItemContent = Get-WmiObject -Namespace "root\SMS\Site_$($SiteCode)" -Class SMS_CIContentFiles -ComputerName $SiteServer -Filter "ContentID = $($UpdateItemContentID.ContentID)" -ErrorAction Stop
                     if ($UpdateItemContent -ne $null) {
-                        # Create new custom object for the update content
-                        $PSObject = [PSCustomObject]@{
-                            "DisplayName" = $UpdateItem.LocalizedDisplayName
-                            "ArticleID" = $UpdateItem.ArticleID
-                            "FileName" = $UpdateItemContent.FileName.Insert($UpdateItemContent.FileName.Length-4, "-$($OSVersion)-$($UpdateType.Replace(' ', '').Replace('.', ''))")
-                            "SourceURL" = $UpdateItemContent.SourceURL
-                            "DateRevised" = [System.Management.ManagementDateTimeConverter]::ToDateTime($UpdateItem.DateRevised)
+                        # Download only the natively pre-installed .NET Framework update item
+                        switch ($UpdateType) {
+                            ".NET Framework" {
+                                $NETFrameworkOSNativeFileDetails = $NETFrameworkOSNativeTable[-join@($OSName.Replace(" ", ""), $OSVersion)]
+                                if ($UpdateItemContent.FileName -like "*$($NETFrameworkOSNativeFileDetails).cab") {
+                                    $ProcessDownload = $true
+                                }
+                                else {
+                                    $ProcessDownload = $false
+                                }
+                            }
+                            default {
+                                $ProcessDownload = $true
+                            }
                         }
 
-                        try {
-                            # Start the download of the update item
-                            Write-CMLogEntry -Value " - Downloading update item '$($UpdateType)' content from: $($PSObject.SourceURL)" -Severity 1
-                            Start-DownloadFile -URL $PSObject.SourceURL -Path $FilePath -Name $PSObject.FileName -ErrorAction Stop
-                            Write-CMLogEntry -Value " - Download completed successfully, renamed file to: $($PSObject.FileName)" -Severity 1
-                            $ReturnValue = 0
-                        }
-                        catch [System.Exception] {
-                            Write-CMLogEntry -Value " - Unable to download update item content. Error message: $($_.Exception.Message)" -Severity 2
-                            $ReturnValue = 1
+                        if ($ProcessDownload -eq $true) {
+                            # Create new custom object for the update content
+                            $PSObject = [PSCustomObject]@{
+                                "DisplayName" = $UpdateItem.LocalizedDisplayName
+                                "ArticleID" = $UpdateItem.ArticleID
+                                "FileName" = $UpdateItemContent.FileName.Insert($UpdateItemContent.FileName.Length-4, "-$($OSVersion)-$($UpdateType.Replace(' ', '').Replace('.', ''))")
+                                "SourceURL" = $UpdateItemContent.SourceURL
+                                "DateRevised" = [System.Management.ManagementDateTimeConverter]::ToDateTime($UpdateItem.DateRevised)
+                            }
+
+                            try {
+                                # Start the download of the update item
+                                Write-CMLogEntry -Value " - Downloading update item '$($UpdateType)' content from: $($PSObject.SourceURL)" -Severity 1
+                                Start-DownloadFile -URL $PSObject.SourceURL -Path $FilePath -Name $PSObject.FileName -ErrorAction Stop
+                                Write-CMLogEntry -Value " - Download completed successfully, renamed file to: $($PSObject.FileName)" -Severity 1
+                                $ReturnValue = 0
+                            }
+                            catch [System.Exception] {
+                                Write-CMLogEntry -Value " - Unable to download update item content. Error message: $($_.Exception.Message)" -Severity 2
+                                $ReturnValue = 1
+                            }
                         }
                     }
                     else {
@@ -1104,7 +1165,7 @@ Process {
             
         # Get all dynamic update objects
         Write-CMLogEntry -Value " - Attempting to retrieve dynamic update objects from SMS Provider" -Severity 1
-        $DynamicUpdates = Get-WmiObject -Namespace "root\SMS\Site_$($SiteCode)" -Class SMS_SoftwareUpdate -ComputerName $SiteServer -Filter "LocalizedCategoryInstanceNames = 'Windows 10 Dynamic Update'" -ErrorAction Stop | Where-Object { ($_.LocalizedDisplayName -like "*$($OSVersion)*$($OSArchitecture)*") -and ($_.IsSuperseded -eq $false) -and ($_.IsLatest -eq $true)  } | Sort-Object -Property LocalizedDisplayName
+        $DynamicUpdates = Get-WmiObject -Namespace "root\SMS\Site_$($SiteCode)" -Class SMS_SoftwareUpdate -ComputerName $SiteServer -Filter "LocalizedCategoryInstanceNames = '$($OSName) Dynamic Update'" -ErrorAction Stop | Where-Object { ($_.LocalizedDisplayName -like "*$($OSVersion)*$($OSArchitecture)*") -and ($_.IsSuperseded -eq $false) -and ($_.IsLatest -eq $true)  } | Sort-Object -Property LocalizedDisplayName
         if ($DynamicUpdates -ne $null) {
             foreach ($DynamicUpdate in $DynamicUpdates) {
                 # Determine the Content IDs for each dynamic update
@@ -1481,7 +1542,7 @@ Process {
         try {
             # Export selected OS image edition from OS media files location to a temporary image
             Write-CMLogEntry -Value " - Exporting OS image from media source location to temporary OS image: $($Script:OSImageTempWim)" -Severity 1
-            Export-WindowsImage -SourceImagePath $OSInstallWim -DestinationImagePath $OSImageTempWim -SourceName "Windows 10 $($OSEdition)" -ErrorAction Stop | Out-Null
+            Export-WindowsImage -SourceImagePath $OSInstallWim -DestinationImagePath $OSImageTempWim -SourceName "$($OSName) $($OSEdition)" -ErrorAction Stop | Out-Null
         }
         catch [System.Exception] {
             Write-CMLogEntry -Value " - Failed to export temporary OS image from media files. Error message: $($_.Exception.Message)" -Severity 3
@@ -1496,8 +1557,8 @@ Process {
         try {
             # Export OS image to temporary location
             $NewOSImageWim = Join-Path -Path $MountTemp -ChildPath "install.wim"
-            Write-CMLogEntry -Value " - Attempting to export OS edition Windows 10 $($OSEdition) to temporary location from file: $($OSImageTempWim)" -Severity 1
-            Export-WindowsImage -SourceImagePath $OSImageTempWim -DestinationImagePath $NewOSImageWim -SourceName "Windows 10 $($OSEdition)" -ErrorAction Stop | Out-Null
+            Write-CMLogEntry -Value " - Attempting to export OS edition $($OSName) $($OSEdition) to temporary location from file: $($OSImageTempWim)" -Severity 1
+            Export-WindowsImage -SourceImagePath $OSImageTempWim -DestinationImagePath $NewOSImageWim -SourceName "$($OSName) $($OSEdition)" -ErrorAction Stop | Out-Null
         }
         catch [System.Exception] {
             Write-CMLogEntry -Value " - Failed to export serviced OS image with edition '$($OSEdition)'. Error message: $($_.Exception.Message)" -Severity 3
@@ -2265,9 +2326,9 @@ Process {
         }
 
         # Verify that all required product categories have been subscribed to in the Software Update Point
-        $ProductCategories = @("Windows 10", "Windows 10, version 1903 and later", "Windows 10 Dynamic Update")
+        $ProductCategories = @("Windows 11", "Windows 11 Dynamic Updates", "Windows 10", "Windows 10, version 1903 and later", "Windows 10 Dynamic Update")
         foreach ($ProductCategory in $ProductCategories) {
-            if ($ProductCategory -like "Windows 10 Dynamic Updates") {
+            if (($ProductCategory -like "Windows 10 Dynamic Updates") -or ($ProductCategory -like "Windows 11 Dynamic Updates")) {
                 if ($PSBoundParameters["IncludeDynamicUpdates"]) {
                     $ReturnValue = Test-ProductCategorySubscribedState -Product $ProductCategory
                     if ($ReturnValue -eq $true) {
